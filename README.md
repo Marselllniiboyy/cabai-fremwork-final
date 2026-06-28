@@ -40,7 +40,7 @@ copy .env.example .env
 # Generate application key
 php artisan key:generate
 
-# Migrasi database (akan otomatis membuat database.sqlite jika menggunakan SQLite)
+# Migrasi database (akan otomatis membuat database.sqlite jika , mysql ganti pakai mysql ton)
 php artisan migrate
 
 # Tautkan folder storage agar foto profil dan foto deteksi dapat diakses publik
