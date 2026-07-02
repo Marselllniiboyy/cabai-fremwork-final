@@ -1,6 +1,9 @@
-import { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import api from '../api/axios'
+import LoadingSpinner from '../components/LoadingSpinner'
+import { getDiseaseTranslation } from '../utils/diseaseHelper'
+import { Sprout, MapPin, Check, ArrowRight, ArrowLeft, Camera, Search, Lightbulb, Activity, Target, Grid, AlertTriangle, History } from 'lucide-react'
 import { useToast } from '../components/Toast'
 
 const STEPS = ['Pilih Lahan', 'Upload Foto', 'Hasil Deteksi']
@@ -17,13 +20,14 @@ function SevAdvice({ level }) {
     rendah: 'Tanaman terdeteksi aman. Tetap pantau kondisi secara berkala dan jaga kebersihan lahan.',
     sedang: 'Ada tanda penyakit awal. Segera lakukan pengendalian dini seperti pemangkasan daun yang terkena dan aplikasi fungisida ringan.',
     tinggi: 'Infeksi cukup parah! Segera lakukan tindakan pengendalian intensif. Pertimbangkan konsultasi dengan penyuluh pertanian.',
-    kritis: '🚨 Kondisi KRITIS! Diperlukan penanganan segera. Isolasi tanaman yang terinfeksi dan hubungi ahli pertanian secepatnya.',
+    kritis: 'Kondisi KRITIS! Diperlukan penanganan segera. Isolasi tanaman yang terinfeksi dan hubungi ahli pertanian secepatnya.',
   }
   const colors = { rendah: 'var(--clr-primary-bg)', sedang: 'var(--clr-warning-bg)', tinggi: '#fff7ed', kritis: 'var(--clr-danger-bg)' }
   const border = { rendah: '#bbf7d0', sedang: '#fde68a', tinggi: '#fed7aa', kritis: '#fecaca' }
   return (
-    <div style={{ background: colors[key] || 'var(--clr-surface-2)', border: `1px solid ${border[key] || 'var(--clr-border)'}`, borderRadius: 'var(--r-md)', padding: '12px 16px', fontSize: 'var(--fs-sm)', lineHeight: 1.6, marginTop: 12 }}>
-      💡 {advice[key] || 'Pantau kondisi tanaman secara berkala.'}
+    <div style={{ background: colors[key] || 'var(--clr-surface-2)', border: `1px solid ${border[key] || 'var(--clr-border)'}`, borderRadius: 'var(--r-md)', padding: '12px 16px', fontSize: 'var(--fs-sm)', lineHeight: 1.6, marginTop: 12, display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+      <Lightbulb style={{ width: 18, height: 18, color: 'var(--clr-warning)', flexShrink: 0, marginTop: 2 }} />
+      <span>{advice[key] || 'Pantau kondisi tanaman secara berkala.'}</span>
     </div>
   )
 }
@@ -66,7 +70,7 @@ export default function DeteksiBaruPage() {
       })
       setResult(data)
       setStep(2)
-      toast('Deteksi berhasil! ✅')
+      toast('Deteksi berhasil!')
     } catch (err) {
       const msg = err.response?.data?.message || 'Gagal mendeteksi. Pastikan ML service aktif.'
       toast(msg, 'error')
@@ -77,7 +81,10 @@ export default function DeteksiBaruPage() {
   return (
     <div className="page-content animate-fade">
       <div className="page-header">
-        <h1 className="page-title">📷 Deteksi Baru</h1>
+        <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Camera style={{ width: '28px', height: '28px', color: 'var(--clr-primary)' }} />
+          <span>Deteksi Baru</span>
+        </h1>
         <p className="page-subtitle">Upload foto daun cabai untuk mendeteksi penyakit</p>
       </div>
 
@@ -103,7 +110,9 @@ export default function DeteksiBaruPage() {
           <h2 className="card-title">Pilih Lahan yang Akan Dideteksi</h2>
           {lahans.length === 0 ? (
             <div className="empty-state" style={{ padding: '24px 0' }}>
-              <div className="empty-icon">🌾</div>
+              <div className="empty-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Sprout style={{ width: 48, height: 48, strokeWidth: 1.5, color: 'var(--clr-text-3)' }} />
+              </div>
               <p className="empty-title">Belum ada lahan</p>
               <p className="empty-desc">Tambahkan lahan terlebih dahulu sebelum melakukan deteksi</p>
               <button className="btn btn-primary" onClick={() => navigate('/lahan')}>Tambah Lahan</button>
@@ -121,12 +130,19 @@ export default function DeteksiBaruPage() {
                     cursor: 'pointer', transition: 'all var(--dur-fast)',
                   }}>
                     <input type="radio" name="lahan" value={l.id} checked={selectedLahan == l.id} onChange={e => setSelectedLahan(e.target.value)} style={{ display: 'none' }} />
-                    <span style={{ fontSize: 24 }}>🌾</span>
-                    <div style={{ flex: 1 }}>
-                      <div className="font-bold">{l.nama_lahan}</div>
-                      {l.lokasi && <div className="text-sm text-muted">📍 {l.lokasi}</div>}
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: selectedLahan == l.id ? '#fff' : 'var(--clr-surface-2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Sprout style={{ width: 20, height: 20, color: 'var(--clr-primary)' }} />
                     </div>
-                    {selectedLahan == l.id && <span style={{ color: 'var(--clr-primary)', fontSize: 20 }}>✓</span>}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="font-bold">{l.nama_lahan}</div>
+                      {l.lokasi && (
+                        <div className="text-sm text-muted" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                          <MapPin style={{ width: 12, height: 12, color: 'var(--clr-text-3)' }} />
+                          <span>{l.lokasi}</span>
+                        </div>
+                      )}
+                    </div>
+                    {selectedLahan == l.id && <Check style={{ width: 20, height: 20, color: 'var(--clr-primary)' }} />}
                   </label>
                 ))}
               </div>
@@ -135,8 +151,10 @@ export default function DeteksiBaruPage() {
                 disabled={!selectedLahan}
                 onClick={() => setStep(1)}
                 id="btn-next-step1"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
-                Lanjut → Upload Foto
+                <span>Lanjut Upload Foto</span>
+                <ArrowRight style={{ width: 16, height: 16 }} />
               </button>
             </>
           )}
@@ -162,12 +180,17 @@ export default function DeteksiBaruPage() {
             {imagePreview ? (
               <>
                 <img src={imagePreview} alt="Preview" className="upload-preview" />
-                <p className="text-sm text-primary" style={{ marginTop: 8, fontWeight: 600 }}>✅ {imageFile?.name}</p>
+                <p className="text-sm text-primary" style={{ marginTop: 8, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <Check style={{ width: 16, height: 16 }} />
+                  <span>{imageFile?.name}</span>
+                </p>
                 <p className="text-sm text-muted">Klik untuk ganti foto</p>
               </>
             ) : (
               <>
-                <div className="upload-icon">📷</div>
+                <div className="upload-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                  <Camera style={{ width: 36, height: 36, color: 'var(--clr-text-3)' }} />
+                </div>
                 <p className="upload-text">Ketuk untuk mengambil foto atau pilih dari galeri</p>
                 <p className="upload-hint">JPG, PNG · Maks 5MB</p>
               </>
@@ -175,23 +198,31 @@ export default function DeteksiBaruPage() {
           </div>
 
           <div style={{ display: 'flex', gap: 12, marginTop: 'var(--sp-5)' }}>
-            <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setStep(0)}>← Kembali</button>
+            <button className="btn btn-ghost" style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }} onClick={() => setStep(0)}>
+              <ArrowLeft style={{ width: 16, height: 16 }} />
+              <span>Kembali</span>
+            </button>
             <button
               className="btn btn-primary"
-              style={{ flex: 2 }}
+              style={{ flex: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               disabled={!imageFile || loading}
               onClick={handleSubmit}
               id="btn-submit-deteksi"
             >
               {loading ? (
                 <><div className="spinner spinner-sm" /> Menganalisis AI...</>
-              ) : '🔍 Analisis Sekarang'}
+              ) : (
+                <>
+                  <Search style={{ width: 16, height: 16 }} />
+                  <span>Analisis Sekarang</span>
+                </>
+              )}
             </button>
           </div>
 
           {loading && (
             <div style={{ textAlign: 'center', marginTop: 16, color: 'var(--clr-text-2)', fontSize: 'var(--fs-sm)' }}>
-              <p>🤖 Model AI sedang menganalisis gambar...</p>
+              <p>Model AI sedang menganalisis gambar...</p>
               <p style={{ marginTop: 4 }}>Harap tunggu beberapa saat</p>
             </div>
           )}
@@ -209,15 +240,25 @@ export default function DeteksiBaruPage() {
             )}
             <div className="result-body">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <span style={{ fontSize: 28 }}>🦠</span>
+                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--clr-primary-bg)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Activity style={{ width: 22, height: 22, color: 'var(--clr-primary)' }} />
+                </div>
                 <div>
-                  <div className="result-disease">{result.data?.jenis_penyakit}</div>
+                  <div className="result-disease" style={{ fontWeight: '800', fontSize: 'var(--fs-lg)' }}>
+                    {getDiseaseTranslation(result.data?.jenis_penyakit).en}
+                  </div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--clr-text-2)', fontWeight: '500', marginBottom: '6px' }}>
+                    {getDiseaseTranslation(result.data?.jenis_penyakit).id}
+                  </div>
                   <SevBadge level={result.data?.tingkat_keparahan} />
                 </div>
               </div>
 
               <div className="result-row">
-                <span className="result-key">🎯 Confidence</span>
+                <span className="result-key" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Target style={{ width: 14, height: 14, color: 'var(--clr-text-3)' }} />
+                  <span>Confidence</span>
+                </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div className="conf-bar-bg" style={{ width: 80 }}>
                     <div className="conf-bar" style={{ width: `${(result.data?.confidence * 100).toFixed(0)}%` }} />
@@ -226,11 +267,17 @@ export default function DeteksiBaruPage() {
                 </div>
               </div>
               <div className="result-row">
-                <span className="result-key">📊 Cluster KMeans</span>
+                <span className="result-key" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Grid style={{ width: 14, height: 14, color: 'var(--clr-text-3)' }} />
+                  <span>Cluster KMeans</span>
+                </span>
                 <span className="result-val">Cluster {result.data?.cluster}</span>
               </div>
               <div className="result-row">
-                <span className="result-key">⚠️ Tingkat Keparahan</span>
+                <span className="result-key" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <AlertTriangle style={{ width: 14, height: 14, color: 'var(--clr-text-3)' }} />
+                  <span>Tingkat Keparahan</span>
+                </span>
                 <span className={`result-val sev-${(result.data?.tingkat_keparahan || '').toLowerCase()}`}>
                   {result.data?.tingkat_keparahan}
                 </span>
@@ -241,11 +288,13 @@ export default function DeteksiBaruPage() {
           </div>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => { setStep(0); setImageFile(null); setImagePreview(null); setResult(null) }}>
-              📷 Deteksi Lagi
+            <button className="btn btn-secondary" style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => { setStep(0); setImageFile(null); setImagePreview(null); setResult(null) }}>
+              <Camera style={{ width: 16, height: 16 }} />
+              <span>Deteksi Lagi</span>
             </button>
-            <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => navigate('/deteksi')}>
-              📋 Lihat Riwayat
+            <button className="btn btn-primary" style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => navigate('/deteksi')}>
+              <History style={{ width: 16, height: 16 }} />
+              <span>Lihat Riwayat</span>
             </button>
           </div>
         </div>

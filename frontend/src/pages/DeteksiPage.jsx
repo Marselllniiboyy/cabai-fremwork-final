@@ -1,9 +1,11 @@
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api/axios'
 import { useToast } from '../components/Toast'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { getDiseaseTranslation } from '../utils/diseaseHelper'
+import { History, Camera, Search, FileText, Sprout, AlertTriangle, Eye, Trash2 } from 'lucide-react'
 
 function SevBadge({ level }) {
   const key = (level || '').toLowerCase()
@@ -55,11 +57,15 @@ export default function DeteksiPage() {
     <div className="page-content animate-fade">
       <div className="page-header flex-between flex-wrap gap-3">
         <div>
-          <h1 className="page-title">🔬 Riwayat Deteksi</h1>
+          <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <History style={{ width: '28px', height: '28px', color: 'var(--clr-primary)' }} />
+            <span>Riwayat Deteksi</span>
+          </h1>
           <p className="page-subtitle">Semua hasil deteksi penyakit daun cabai Anda</p>
         </div>
-        <Link to="/deteksi/baru" className="btn btn-primary hide-mobile">
-          📷 Deteksi Baru
+        <Link to="/deteksi/baru" className="btn btn-primary hide-mobile" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <Camera style={{ width: '18px', height: '18px' }} />
+          <span>Deteksi Baru</span>
         </Link>
       </div>
 
@@ -72,7 +78,7 @@ export default function DeteksiPage() {
           onChange={e => { setFilters(f => ({ ...f, lahan_id: e.target.value })); setPage(1) }}
           id="filter-lahan"
         >
-          <option value="">🌾 Semua Lahan</option>
+          <option value="">Semua Lahan</option>
           {lahans.map(l => <option key={l.id} value={l.id}>{l.nama_lahan}</option>)}
         </select>
 
@@ -83,7 +89,7 @@ export default function DeteksiPage() {
           onChange={e => { setFilters(f => ({ ...f, tingkat_keparahan: e.target.value })); setPage(1) }}
           id="filter-keparahan"
         >
-          <option value="">⚠️ Semua Keparahan</option>
+          <option value="">Semua Keparahan</option>
           {SEV_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
 
@@ -98,10 +104,12 @@ export default function DeteksiPage() {
         <>
           {detections.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🔬</div>
+              <div className="empty-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <History style={{ width: 48, height: 48, strokeWidth: 1.5, color: 'var(--clr-text-3)' }} />
+              </div>
               <p className="empty-title">Tidak ada data deteksi</p>
               <p className="empty-desc">Belum ada deteksi yang cocok dengan filter ini</p>
-              <Link to="/deteksi/baru" className="btn btn-primary">Mulai Deteksi</Link>
+              <Link to="/deteksi/baru" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Camera style={{ width: 16, height: 16 }} /> Mulai Deteksi</Link>
             </div>
           ) : (
             <>
@@ -112,10 +120,22 @@ export default function DeteksiPage() {
                     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                       {d.image_path ? (
                         <img src={`/storage/${d.image_path}`} alt="" style={{ width: 64, height: 64, borderRadius: 'var(--r-md)', objectFit: 'cover', flexShrink: 0 }} onError={e => { e.target.style.display='none' }} />
-                      ) : <div style={{ width: 64, height: 64, borderRadius: 'var(--r-md)', background: 'var(--clr-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>🦠</div>}
+                      ) : (
+                        <div style={{ width: 64, height: 64, borderRadius: 'var(--r-md)', background: 'var(--clr-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <FileText style={{ width: 24, height: 24, color: 'var(--clr-text-3)' }} />
+                        </div>
+                      )}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="font-bold" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.jenis_penyakit}</div>
-                        <div className="text-sm text-muted">🌾 {d.lahan?.nama_lahan || '—'}</div>
+                        <div className="font-bold" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {getDiseaseTranslation(d.jenis_penyakit).en}
+                        </div>
+                        <div className="text-xs text-muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>
+                          {getDiseaseTranslation(d.jenis_penyakit).id}
+                        </div>
+                        <div className="text-sm text-muted" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: 4 }}>
+                          <Sprout style={{ width: 14, height: 14, color: 'var(--clr-text-3)' }} />
+                          <span>{d.lahan?.nama_lahan || '—'}</span>
+                        </div>
                         <div className="text-sm text-muted">{new Date(d.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                         <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           <SevBadge level={d.tingkat_keparahan} />
@@ -123,8 +143,12 @@ export default function DeteksiPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-                        <Link to={`/deteksi/${d.id}`} className="btn-icon" title="Detail">👁️</Link>
-                        <button className="btn-icon danger" onClick={() => setDeleteTarget(d)} title="Hapus">🗑️</button>
+                        <Link to={`/deteksi/${d.id}`} className="btn-icon" title="Detail" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Eye style={{ width: 16, height: 16 }} />
+                        </Link>
+                        <button className="btn-icon danger" onClick={() => setDeleteTarget(d)} title="Hapus" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Trash2 style={{ width: 16, height: 16 }} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -153,9 +177,16 @@ export default function DeteksiPage() {
                           <td>
                             {d.image_path ? (
                               <img src={`/storage/${d.image_path}`} alt="" style={{ width: 44, height: 44, borderRadius: 'var(--r-sm)', objectFit: 'cover' }} onError={e => { e.target.style.display='none' }} />
-                            ) : <span>🦠</span>}
+                            ) : (
+                              <div style={{ width: 44, height: 44, borderRadius: 'var(--r-sm)', background: 'var(--clr-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FileText style={{ width: 16, height: 16, color: 'var(--clr-text-3)' }} />
+                              </div>
+                            )}
                           </td>
-                          <td><span className="font-bold">{d.jenis_penyakit}</span></td>
+                           <td>
+                             <div className="font-bold">{getDiseaseTranslation(d.jenis_penyakit).en}</div>
+                             <div className="text-xs text-muted" style={{ marginTop: 2 }}>{getDiseaseTranslation(d.jenis_penyakit).id}</div>
+                           </td>
                           <td>{d.lahan?.nama_lahan || '—'}</td>
                           <td><SevBadge level={d.tingkat_keparahan} /></td>
                           <td>
@@ -168,8 +199,12 @@ export default function DeteksiPage() {
                           <td>{new Date(d.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                           <td>
                             <div style={{ display: 'flex', gap: 6 }}>
-                              <Link to={`/deteksi/${d.id}`} className="btn-icon" title="Detail">👁️</Link>
-                              <button className="btn-icon danger" onClick={() => setDeleteTarget(d)} title="Hapus">🗑️</button>
+                              <Link to={`/deteksi/${d.id}`} className="btn-icon" title="Detail" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Eye style={{ width: 16, height: 16 }} />
+                              </Link>
+                              <button className="btn-icon danger" onClick={() => setDeleteTarget(d)} title="Hapus" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Trash2 style={{ width: 16, height: 16 }} />
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -193,13 +228,20 @@ export default function DeteksiPage() {
       )}
 
       {/* FAB Mobile */}
-      <Link to="/deteksi/baru" className="fab hide-desktop" aria-label="Deteksi baru">📷</Link>
+      <Link to="/deteksi/baru" className="fab hide-desktop" aria-label="Deteksi baru" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Camera style={{ width: 24, height: 24 }} />
+      </Link>
 
       {/* Confirm Delete */}
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="🗑️ Hapus Riwayat Deteksi?"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Trash2 style={{ width: 20, height: 20, color: 'var(--clr-danger)' }} />
+            <span>Hapus Riwayat Deteksi?</span>
+          </div>
+        }
         actions={
           <>
             <button className="btn btn-ghost" onClick={() => setDeleteTarget(null)}>Batal</button>
@@ -207,7 +249,7 @@ export default function DeteksiPage() {
           </>
         }
       >
-        <p className="text-muted">Apakah Anda yakin ingin menghapus riwayat deteksi <strong>{deleteTarget?.jenis_penyakit}</strong> ini?</p>
+        <p className="text-muted">Apakah Anda yakin ingin menghapus riwayat deteksi <strong>{deleteTarget ? getDiseaseTranslation(deleteTarget.jenis_penyakit).en : ''}</strong> ini?</p>
       </Modal>
     </div>
   )

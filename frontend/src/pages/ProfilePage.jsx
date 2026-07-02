@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
 import api from '../api/axios'
+import { User, Save } from 'lucide-react'
 
 import Modal from '../components/Modal'
 
@@ -65,7 +66,7 @@ export default function ProfilePage() {
       })
       
       updateUser(response.data.user)
-      toast('Profil berhasil diperbarui! ✅')
+      toast('Profil berhasil diperbarui!')
     } catch (err) {
       toast(err.response?.data?.message || 'Gagal memperbarui profil', 'error')
     } finally {
@@ -78,7 +79,10 @@ export default function ProfilePage() {
   return (
     <div className="page-content animate-fade">
       <div className="page-header">
-        <h1 className="page-title">👤 Edit Profil</h1>
+        <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <User style={{ width: '28px', height: '28px', color: 'var(--clr-primary)' }} />
+          <span>Edit Profil</span>
+        </h1>
         <p className="page-subtitle">Kelola informasi data diri dan foto profil Anda</p>
       </div>
 
@@ -151,8 +155,13 @@ export default function ProfilePage() {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: 'var(--sp-4)' }}>
-            {loading ? <><div className="spinner spinner-sm" /> Menyimpan...</> : 'Simpan Perubahan 💾'}
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: 'var(--sp-4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            {loading ? <><div className="spinner spinner-sm" /> Menyimpan...</> : (
+              <>
+                <Save style={{ width: 16, height: 16 }} />
+                <span>Simpan Perubahan</span>
+              </>
+            )}
           </button>
         </form>
       </div>
@@ -160,7 +169,12 @@ export default function ProfilePage() {
       <Modal
         open={showConfirm}
         onClose={() => setShowConfirm(false)}
-        title="💾 Konfirmasi Simpan"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Save style={{ width: 20, height: 20, color: 'var(--clr-primary)' }} />
+            <span>Konfirmasi Simpan</span>
+          </div>
+        }
         actions={
           <>
             <button className="btn btn-ghost" onClick={() => setShowConfirm(false)}>Batal</button>
