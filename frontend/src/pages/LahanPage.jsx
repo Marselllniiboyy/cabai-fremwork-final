@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import api from '../api/axios'
 import { useToast } from '../components/Toast'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { Sprout, Search, Plus, MapPin, Maximize2, Edit2, Trash2 } from 'lucide-react'
 
 export default function LahanPage() {
   const { toast } = useToast()
@@ -41,10 +42,10 @@ export default function LahanPage() {
     try {
       if (editTarget) {
         await api.put(`/lahans/${editTarget.id}`, data)
-        toast('Lahan berhasil diperbarui ✅')
+        toast('Lahan berhasil diperbarui')
       } else {
         await api.post('/lahans', data)
-        toast('Lahan berhasil ditambahkan 🌱')
+        toast('Lahan berhasil ditambahkan')
       }
       setShowModal(false)
       setPage(1)
@@ -68,14 +69,19 @@ export default function LahanPage() {
   return (
     <div className="page-content animate-fade">
       <div className="page-header">
-        <h1 className="page-title">🌱 Lahan Saya</h1>
+        <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Sprout style={{ width: '28px', height: '28px', color: 'var(--clr-primary)' }} />
+          <span>Lahan Saya</span>
+        </h1>
         <p className="page-subtitle">Kelola semua lahan pertanian cabai Anda</p>
       </div>
 
       {/* Search bar */}
       <div className="search-bar">
         <div className="search-input-wrap">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <Search style={{ width: 16, height: 16 }} />
+          </span>
           <input
             className="form-input"
             placeholder="Cari nama lahan..."
@@ -84,8 +90,9 @@ export default function LahanPage() {
             id="search-lahan"
           />
         </div>
-        <button className="btn btn-primary hide-mobile" onClick={openAdd} id="btn-add-lahan">
-          <span>＋</span> Tambah Lahan
+        <button className="btn btn-primary hide-mobile" onClick={openAdd} id="btn-add-lahan" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Plus style={{ width: 16, height: 16 }} />
+          <span>Tambah Lahan</span>
         </button>
       </div>
 
@@ -93,10 +100,12 @@ export default function LahanPage() {
         <>
           {lahans.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🌾</div>
+              <div className="empty-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Sprout style={{ width: 48, height: 48, strokeWidth: 1.5, color: 'var(--clr-text-3)' }} />
+              </div>
               <p className="empty-title">{search ? 'Lahan tidak ditemukan' : 'Belum ada lahan'}</p>
               <p className="empty-desc">{search ? 'Coba kata kunci lain' : 'Tambahkan lahan pertanian pertama Anda'}</p>
-              {!search && <button className="btn btn-primary" onClick={openAdd}>Tambah Lahan</button>}
+              {!search && <button className="btn btn-primary" onClick={openAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Plus style={{ width: 16, height: 16 }} /> Tambah Lahan</button>}
             </div>
           ) : (
             <div className="grid-2">
@@ -104,9 +113,20 @@ export default function LahanPage() {
                 <div key={l.id} className="lahan-card">
                   <div className="lahan-card-header">
                     <div>
-                      <div className="lahan-name">🌾 {l.nama_lahan}</div>
-                      <div className="lahan-detail">📍 {l.lokasi || 'Lokasi tidak diset'}</div>
-                      {l.luas_m2 && <div className="lahan-detail">📐 {Number(l.luas_m2).toLocaleString('id')} m²</div>}
+                      <div className="lahan-name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
+                        <Sprout style={{ width: 18, height: 18, color: 'var(--clr-primary)' }} />
+                        <span>{l.nama_lahan}</span>
+                      </div>
+                      <div className="lahan-detail" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
+                        <MapPin style={{ width: 14, height: 14, color: 'var(--clr-text-3)' }} />
+                        <span>{l.lokasi || 'Lokasi tidak diset'}</span>
+                      </div>
+                      {l.luas_m2 && (
+                        <div className="lahan-detail" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                          <Maximize2 style={{ width: 14, height: 14, color: 'var(--clr-text-3)' }} />
+                          <span>{Number(l.luas_m2).toLocaleString('id')} m²</span>
+                        </div>
+                      )}
                       <div className="lahan-detail" style={{ marginTop: 4 }}>
                         <span className="badge badge-gray">Oleh: {l.user?.name || '—'}</span>
                       </div>
@@ -116,8 +136,12 @@ export default function LahanPage() {
                     <Link to={`/lahan/${l.id}`} className="btn btn-secondary btn-sm" style={{ flex: 1, textAlign: 'center' }}>
                       Detail
                     </Link>
-                    <button className="btn-icon" onClick={() => openEdit(l)} title="Edit" aria-label="Edit lahan">✏️</button>
-                    <button className="btn-icon danger" onClick={() => setDeleteTarget(l)} title="Hapus" aria-label="Hapus lahan">🗑️</button>
+                    <button className="btn-icon" onClick={() => openEdit(l)} title="Edit" aria-label="Edit lahan" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Edit2 style={{ width: 16, height: 16 }} />
+                    </button>
+                    <button className="btn-icon danger" onClick={() => setDeleteTarget(l)} title="Hapus" aria-label="Hapus lahan" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Trash2 style={{ width: 16, height: 16 }} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -138,13 +162,20 @@ export default function LahanPage() {
       )}
 
       {/* FAB Mobile */}
-      <button className="fab hide-desktop" onClick={openAdd} aria-label="Tambah lahan" id="fab-add-lahan">＋</button>
+      <button className="fab hide-desktop" onClick={openAdd} aria-label="Tambah lahan" id="fab-add-lahan" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Plus style={{ width: 24, height: 24 }} />
+      </button>
 
       {/* Add/Edit Modal */}
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title={editTarget ? '✏️ Edit Lahan' : '🌱 Tambah Lahan Baru'}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {editTarget ? <Edit2 style={{ width: 20, height: 20 }} /> : <Sprout style={{ width: 20, height: 20, color: 'var(--clr-primary)' }} />}
+            <span>{editTarget ? 'Edit Lahan' : 'Tambah Lahan Baru'}</span>
+          </div>
+        }
         actions={
           <>
             <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Batal</button>
@@ -179,7 +210,12 @@ export default function LahanPage() {
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="🗑️ Hapus Lahan?"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Trash2 style={{ width: 20, height: 20, color: 'var(--clr-danger)' }} />
+            <span>Hapus Lahan?</span>
+          </div>
+        }
         actions={
           <>
             <button className="btn btn-ghost" onClick={() => setDeleteTarget(null)}>Batal</button>

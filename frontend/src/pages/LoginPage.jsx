@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
+import { Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -17,7 +18,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const user = await login(data.email, data.password)
-      toast(`Selamat datang, ${user.name}! 👋`)
+      toast(`Selamat datang, ${user.name}!`)
       navigate('/dashboard')
     } catch (err) {
       const msg = err.response?.data?.message || 'Email atau password salah'
@@ -31,9 +32,13 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-card animate-fade">
-        <div className="auth-logo">
-          <div className="auth-logo-icon">🌶️</div>
-          <h1 className="auth-title">Masuk ke CabaiDetect</h1>
+        <div className="auth-logo" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img 
+            src="/logo.jpg" 
+            alt="Logo" 
+            style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover', marginBottom: '16px', boxShadow: 'var(--shadow-md)' }} 
+          />
+          <h1 className="auth-title">Masuk ke CLF</h1>
           <p className="auth-subtitle">Smart Farming · Deteksi Penyakit Daun Cabai</p>
         </div>
 
@@ -63,8 +68,8 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 {...register('password', { required: 'Password wajib diisi' })}
               />
-              <button type="button" className="password-toggle" onClick={() => setShowPass(p => !p)}>
-                {showPass ? '🙈' : '👁️'}
+              <button type="button" className="password-toggle" onClick={() => setShowPass(p => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showPass ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
               </button>
             </div>
             {errors.password && <span className="form-error">{errors.password.message}</span>}
@@ -77,14 +82,21 @@ export default function LoginPage() {
           )}
 
           <button type="submit" className="btn btn-primary btn-full" disabled={loading} id="btn-login">
-            {loading ? <><div className="spinner spinner-sm" /> Memproses...</> : 'Masuk 🚀'}
+            {loading ? <><div className="spinner spinner-sm" /> Memproses...</> : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <span>Masuk</span>
+                <ArrowRight style={{ width: 16, height: 16 }} />
+              </div>
+            )}
           </button>
         </form>
 
         <p className="auth-divider">Belum punya akun?</p>
         <Link to="/register" className="btn btn-secondary btn-full" id="btn-go-register">Daftar Sekarang</Link>
-        <div style={{ textAlign: 'center', marginTop: 16 }}>
-          <Link to="/" className="text-sm text-muted">← Kembali ke Beranda</Link>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+          <Link to="/" className="text-sm text-muted" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <ArrowLeft style={{ width: 14, height: 14 }} /> Kembali ke Beranda
+          </Link>
         </div>
       </div>
     </div>

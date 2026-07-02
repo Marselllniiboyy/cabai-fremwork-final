@@ -1,3 +1,5 @@
+import React from 'react'
+
 export default function LoadingSpinner({ fullPage = false, text = 'Memuat...' }) {
   if (fullPage) {
     return (

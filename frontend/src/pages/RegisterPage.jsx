@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
+import { Eye, EyeOff, UserPlus, ArrowLeft } from 'lucide-react'
 
 export default function RegisterPage() {
   const { register: authRegister } = useAuth()
@@ -23,7 +24,7 @@ export default function RegisterPage() {
         password: data.password,
         password_confirmation: data.password_confirmation,
       })
-      toast(`Akun berhasil dibuat! Selamat datang, ${user.name} 🎉`)
+      toast(`Akun berhasil dibuat! Selamat datang, ${user.name}`)
       navigate('/dashboard')
     } catch (err) {
       const errors_be = err.response?.data?.errors
@@ -43,10 +44,14 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card animate-fade">
-        <div className="auth-logo">
-          <div className="auth-logo-icon">🌶️</div>
+        <div className="auth-logo" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img 
+            src="/logo.jpg" 
+            alt="Logo" 
+            style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover', marginBottom: '16px', boxShadow: 'var(--shadow-md)' }} 
+          />
           <h1 className="auth-title">Buat Akun Baru</h1>
-          <p className="auth-subtitle">Bergabung dengan CabaiDetect Smart Farming</p>
+          <p className="auth-subtitle">Bergabung dengan CLF Smart Farming</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -87,8 +92,8 @@ export default function RegisterPage() {
                 placeholder="Minimal 8 karakter"
                 {...register('password', { required: 'Password wajib diisi', minLength: { value: 8, message: 'Password minimal 8 karakter' } })}
               />
-              <button type="button" className="password-toggle" onClick={() => setShowPass(p => !p)}>
-                {showPass ? '🙈' : '👁️'}
+              <button type="button" className="password-toggle" onClick={() => setShowPass(p => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showPass ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
               </button>
             </div>
             {errors.password && <span className="form-error">{errors.password.message}</span>}
@@ -116,14 +121,21 @@ export default function RegisterPage() {
           )}
 
           <button type="submit" className="btn btn-primary btn-full" disabled={loading} id="btn-register">
-            {loading ? <><div className="spinner spinner-sm" /> Membuat akun...</> : 'Daftar Sekarang 🎉'}
+            {loading ? <><div className="spinner spinner-sm" /> Membuat akun...</> : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <span>Daftar Sekarang</span>
+                <UserPlus style={{ width: 16, height: 16 }} />
+              </div>
+            )}
           </button>
         </form>
 
         <p className="auth-divider">Sudah punya akun?</p>
         <Link to="/login" className="btn btn-secondary btn-full">Masuk</Link>
-        <div style={{ textAlign: 'center', marginTop: 16 }}>
-          <Link to="/" className="text-sm text-muted">← Kembali ke Beranda</Link>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+          <Link to="/" className="text-sm text-muted" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <ArrowLeft style={{ width: 14, height: 14 }} /> Kembali ke Beranda
+          </Link>
         </div>
       </div>
     </div>

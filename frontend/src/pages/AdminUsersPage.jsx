@@ -1,8 +1,9 @@
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import api from '../api/axios'
 import { useToast } from '../components/Toast'
 import Modal from '../components/Modal'
 import LoadingSpinner from '../components/LoadingSpinner'
+import { Users, Search, Award, RefreshCw, Trash2 } from 'lucide-react'
 
 export default function AdminUsersPage() {
   const { toast } = useToast()
@@ -41,7 +42,7 @@ export default function AdminUsersPage() {
   const handleRoleChange = async (newRole) => {
     try {
       await api.patch(`/admin/users/${roleTarget.id}/role`, { role: newRole })
-      toast(`Role user ${roleTarget.name} diubah menjadi ${newRole} ✅`)
+      toast(`Role user ${roleTarget.name} diubah menjadi ${newRole}`)
       setRoleTarget(null)
       fetchUsers()
     } catch (_) { toast('Gagal mengubah role', 'error') }
@@ -50,14 +51,19 @@ export default function AdminUsersPage() {
   return (
     <div className="page-content animate-fade">
       <div className="page-header">
-        <h1 className="page-title">👥 Manajemen User</h1>
-        <p className="page-subtitle">Kelola semua pengguna aplikasi CabaiDetect</p>
+        <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Users style={{ width: '28px', height: '28px', color: 'var(--clr-primary)' }} />
+          <span>Manajemen User</span>
+        </h1>
+        <p className="page-subtitle">Kelola semua pengguna aplikasi CLF</p>
       </div>
 
       {/* Filters */}
       <div className="search-bar">
         <div className="search-input-wrap">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <Search style={{ width: 16, height: 16 }} />
+          </span>
           <input
             className="form-input"
             placeholder="Cari nama atau email..."
@@ -83,14 +89,18 @@ export default function AdminUsersPage() {
       {meta && (
         <div className="grid-4" style={{ marginBottom: 'var(--sp-4)' }}>
           <div className="stat-card">
-            <div className="stat-icon green">👥</div>
+            <div className="stat-icon green" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Users style={{ width: 22, height: 22 }} />
+            </div>
             <div className="stat-info">
               <div className="stat-value">{meta.total || 0}</div>
               <div className="stat-label">Total User</div>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon amber">👑</div>
+            <div className="stat-icon amber" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Award style={{ width: 22, height: 22 }} />
+            </div>
             <div className="stat-info">
               <div className="stat-value">{users.filter(u => u.role === 'admin').length}</div>
               <div className="stat-label">Admin (Halaman Ini)</div>
@@ -103,7 +113,9 @@ export default function AdminUsersPage() {
         <>
           {users.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">👤</div>
+              <div className="empty-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Users style={{ width: 48, height: 48, strokeWidth: 1.5, color: 'var(--clr-text-3)' }} />
+              </div>
               <p className="empty-title">Tidak ada user ditemukan</p>
             </div>
           ) : (
@@ -124,8 +136,14 @@ export default function AdminUsersPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-                        <button className="btn-icon" onClick={() => setRoleTarget(u)} title="Ubah Role" aria-label="Ubah role">🔄</button>
-                        {u.role !== 'admin' && <button className="btn-icon danger" onClick={() => setDeleteTarget(u)} title="Hapus">🗑️</button>}
+                        <button className="btn-icon" onClick={() => setRoleTarget(u)} title="Ubah Role" aria-label="Ubah role" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <RefreshCw style={{ width: 16, height: 16 }} />
+                        </button>
+                        {u.role !== 'admin' && (
+                          <button className="btn-icon danger" onClick={() => setDeleteTarget(u)} title="Hapus" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Trash2 style={{ width: 16, height: 16 }} />
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="text-sm text-muted" style={{ marginTop: 8 }}>
@@ -166,9 +184,13 @@ export default function AdminUsersPage() {
                           <td>{new Date(u.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                           <td>
                             <div style={{ display: 'flex', gap: 6 }}>
-                              <button className="btn-icon" onClick={() => setRoleTarget(u)} title="Ubah Role">🔄</button>
+                              <button className="btn-icon" onClick={() => setRoleTarget(u)} title="Ubah Role" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <RefreshCw style={{ width: 16, height: 16 }} />
+                              </button>
                               {u.role !== 'admin' && (
-                                <button className="btn-icon danger" onClick={() => setDeleteTarget(u)} title="Hapus">🗑️</button>
+                                <button className="btn-icon danger" onClick={() => setDeleteTarget(u)} title="Hapus" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Trash2 style={{ width: 16, height: 16 }} />
+                                </button>
                               )}
                             </div>
                           </td>
@@ -196,7 +218,12 @@ export default function AdminUsersPage() {
       <Modal
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="🗑️ Hapus User?"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Trash2 style={{ width: 20, height: 20, color: 'var(--clr-danger)' }} />
+            <span>Hapus User?</span>
+          </div>
+        }
         actions={
           <>
             <button className="btn btn-ghost" onClick={() => setDeleteTarget(null)}>Batal</button>
@@ -211,16 +238,21 @@ export default function AdminUsersPage() {
       <Modal
         open={!!roleTarget}
         onClose={() => setRoleTarget(null)}
-        title="🔄 Ubah Role User"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <RefreshCw style={{ width: 20, height: 20, color: 'var(--clr-primary)' }} />
+            <span>Ubah Role User</span>
+          </div>
+        }
         actions={<button className="btn btn-ghost" onClick={() => setRoleTarget(null)}>Batal</button>}
       >
         <p className="text-muted" style={{ marginBottom: 16 }}>Ubah role untuk <strong>{roleTarget?.name}</strong>:</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button className="btn btn-primary btn-full" onClick={() => handleRoleChange('admin')} disabled={roleTarget?.role === 'admin'} id="btn-set-admin">
-            👑 Jadikan Admin {roleTarget?.role === 'admin' ? '(Saat ini)' : ''}
+            Jadikan Admin {roleTarget?.role === 'admin' ? '(Saat ini)' : ''}
           </button>
           <button className="btn btn-secondary btn-full" onClick={() => handleRoleChange('petani')} disabled={roleTarget?.role === 'petani'} id="btn-set-petani">
-            🌾 Jadikan Petani {roleTarget?.role === 'petani' ? '(Saat ini)' : ''}
+            Jadikan Petani {roleTarget?.role === 'petani' ? '(Saat ini)' : ''}
           </button>
         </div>
       </Modal>
