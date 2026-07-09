@@ -18,6 +18,8 @@ import DeteksiBaruPage from './pages/DeteksiBaruPage'
 import DeteksiDetailPage from './pages/DeteksiDetailPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import ProfilePage from './pages/ProfilePage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 export default function App() {
   return (
@@ -29,6 +31,8 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
             <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+            <Route path="/lupa-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+            <Route path="/reset-password" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
 
             {/* Protected — with AppLayout (Navbar + Sidebar) */}
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

@@ -9,13 +9,15 @@ import { useToast } from '../components/Toast'
 const STEPS = ['Pilih Lahan', 'Upload Foto', 'Hasil Deteksi']
 
 function SevBadge({ level }) {
-  const key = (level || '').toLowerCase()
+  const rawKey = (level || '').toLowerCase()
+  const key = (rawKey === 'ringan' || rawKey === 'aman' || rawKey === 'sehat') ? 'rendah' : (rawKey === 'berat' ? 'tinggi' : (rawKey === 'sangat berat' ? 'kritis' : rawKey))
   const map = { rendah: 'green', sedang: 'amber', tinggi: 'orange', kritis: 'red' }
   return <span className={`badge badge-${map[key] || 'gray'}`} style={{ fontSize: '1rem', padding: '4px 14px' }}>{level}</span>
 }
 
 function SevAdvice({ level }) {
-  const key = (level || '').toLowerCase()
+  const rawKey = (level || '').toLowerCase()
+  const key = (rawKey === 'ringan' || rawKey === 'aman' || rawKey === 'sehat') ? 'rendah' : (rawKey === 'berat' ? 'tinggi' : (rawKey === 'sangat berat' ? 'kritis' : rawKey))
   const advice = {
     rendah: 'Tanaman terdeteksi aman. Tetap pantau kondisi secara berkala dan jaga kebersihan lahan.',
     sedang: 'Ada tanda penyakit awal. Segera lakukan pengendalian dini seperti pemangkasan daun yang terkena dan aplikasi fungisida ringan.',

@@ -8,7 +8,8 @@ import { getDiseaseTranslation } from '../utils/diseaseHelper'
 import { ArrowLeft, Sprout, MapPin, Maximize2, Camera, Search, Bug, AlertTriangle, History, Eye, Trash2 } from 'lucide-react'
 
 function SevBadge({ level }) {
-  const key = (level || '').toLowerCase()
+  const rawKey = (level || '').toLowerCase()
+  const key = (rawKey === 'ringan' || rawKey === 'aman' || rawKey === 'sehat') ? 'rendah' : (rawKey === 'berat' ? 'tinggi' : (rawKey === 'sangat berat' ? 'kritis' : rawKey))
   const map = { rendah: 'green', sedang: 'amber', tinggi: 'orange', kritis: 'red' }
   return <span className={`badge badge-${map[key] || 'gray'}`}>{level}</span>
 }

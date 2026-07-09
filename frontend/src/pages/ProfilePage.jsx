@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/Toast'
 import api from '../api/axios'
-import { User, Save } from 'lucide-react'
+import { User, Save, Key, Lock, Eye, EyeOff } from 'lucide-react'
 
 import Modal from '../components/Modal'
 
@@ -17,6 +17,21 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar ? `/storage/${user.avatar}` : null)
   const [showConfirm, setShowConfirm] = useState(false)
   const [formDataCache, setFormDataCache] = useState(null)
+
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [showCurrentPass, setShowCurrentPass] = useState(false)
+  const [showNewPass, setShowNewPass] = useState(false)
+  const [showConfirmPass, setShowConfirmPass] = useState(false)
+
+  const { 
+    register: registerPassword, 
+    handleSubmit: handlePasswordSubmit, 
+    formState: { errors: passwordErrors }, 
+    reset: resetPasswordForm, 
+    watch: watchPassword, 
+    setError: setPasswordError 
+  } = useForm()
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -71,6 +86,30 @@ export default function ProfilePage() {
       toast(err.response?.data?.message || 'Gagal memperbarui profil', 'error')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const onSubmitPassword = async (data) => {
+    setPasswordLoading(true)
+    try {
+      await api.post('/change-password', {
+        current_password: data.current_password,
+        new_password: data.new_password,
+        new_password_confirmation: data.new_password_confirmation
+      })
+      toast('Password Anda berhasil diubah!')
+      setShowChangePassword(false)
+      resetPasswordForm()
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Gagal mengubah password'
+      if (err.response?.data?.errors?.current_password) {
+        setPasswordError('current_password', { message: err.response.data.errors.current_password[0] })
+      } else {
+        setPasswordError('root', { message: msg })
+      }
+      toast(msg, 'error')
+    } finally {
+      setPasswordLoading(false)
     }
   }
 
@@ -183,6 +222,105 @@ export default function ProfilePage() {
         }
       >
         <p className="text-muted">Apakah Anda yakin ingin menyimpan perubahan pada profil Anda?</p>
+      </Modal>
+
+      <div className="card" style={{ maxWidth: 600, margin: 'var(--sp-5) auto 0 auto' }}>
+        <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: 6 }}>
+          <Key style={{ width: 20, height: 20, color: 'var(--clr-primary)' }} />
+          <span>Keamanan Akun</span>
+        </h2>
+        <p className="text-sm text-muted" style={{ marginBottom: 16 }}>Jaga keamanan akun Anda dengan mengubah password secara berkala</p>
+        
+        <button className="btn btn-secondary" onClick={() => setShowChangePassword(true)}>
+          Ganti Password
+        </button>
+      </div>
+
+      <Modal
+        open={showChangePassword}
+        onClose={() => { setShowChangePassword(false); resetPasswordForm(); }}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Key style={{ width: 20, height: 20, color: 'var(--clr-primary)' }} />
+            <span>Ganti Password</span>
+          </div>
+        }
+        actions={
+          <>
+            <button className="btn btn-ghost" onClick={() => { setShowChangePassword(false); resetPasswordForm(); }} disabled={passwordLoading}>Batal</button>
+            <button className="btn btn-primary" onClick={handlePasswordSubmit(onSubmitPassword)} disabled={passwordLoading}>
+              {passwordLoading ? <div className="spinner spinner-sm" /> : 'Ubah Password'}
+            </button>
+          </>
+        }
+      >
+        <form onSubmit={handlePasswordSubmit(onSubmitPassword)} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)', marginTop: 8 }}>
+          <div className="form-group">
+            <label className="form-label">Password Saat Ini</label>
+            <div className="password-wrap">
+              <input 
+                type={showCurrentPass ? 'text' : 'password'}
+                className={`form-input ${passwordErrors.current_password ? 'error' : ''}`}
+                placeholder="Masukkan password saat ini"
+                style={{ paddingLeft: 40 }}
+                {...registerPassword('current_password', { required: 'Password saat ini wajib diisi' })}
+              />
+              <Lock style={{ position: 'absolute', left: 14, top: 13, width: 18, height: 18, color: 'var(--clr-text-3)' }} />
+              <button type="button" className="password-toggle" onClick={() => setShowCurrentPass(p => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showCurrentPass ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
+              </button>
+            </div>
+            {passwordErrors.current_password && <span className="form-error">{passwordErrors.current_password.message}</span>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Password Baru</label>
+            <div className="password-wrap">
+              <input 
+                type={showNewPass ? 'text' : 'password'}
+                className={`form-input ${passwordErrors.new_password ? 'error' : ''}`}
+                placeholder="Minimal 8 karakter"
+                style={{ paddingLeft: 40 }}
+                {...registerPassword('new_password', { 
+                  required: 'Password baru wajib diisi',
+                  minLength: { value: 8, message: 'Password minimal 8 karakter' }
+                })}
+              />
+              <Lock style={{ position: 'absolute', left: 14, top: 13, width: 18, height: 18, color: 'var(--clr-text-3)' }} />
+              <button type="button" className="password-toggle" onClick={() => setShowNewPass(p => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showNewPass ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
+              </button>
+            </div>
+            {passwordErrors.new_password && <span className="form-error">{passwordErrors.new_password.message}</span>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Konfirmasi Password Baru</label>
+            <div className="password-wrap">
+              <input 
+                type={showConfirmPass ? 'text' : 'password'}
+                className={`form-input ${passwordErrors.new_password_confirmation ? 'error' : ''}`}
+                placeholder="Ulangi password baru"
+                style={{ paddingLeft: 40 }}
+                {...registerPassword('new_password_confirmation', { 
+                  required: 'Konfirmasi password wajib diisi',
+                  validate: v => v === watchPassword('new_password') || 'Konfirmasi password tidak cocok'
+                })}
+              />
+              <Lock style={{ position: 'absolute', left: 14, top: 13, width: 18, height: 18, color: 'var(--clr-text-3)' }} />
+              <button type="button" className="password-toggle" onClick={() => setShowConfirmPass(p => !p)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showConfirmPass ? <EyeOff style={{ width: 18, height: 18 }} /> : <Eye style={{ width: 18, height: 18 }} />}
+              </button>
+            </div>
+            {passwordErrors.new_password_confirmation && <span className="form-error">{passwordErrors.new_password_confirmation.message}</span>}
+          </div>
+
+          {passwordErrors.root && (
+            <div style={{ background: 'var(--clr-danger-bg)', color: 'var(--clr-danger)', padding: '12px 16px', borderRadius: 'var(--r-md)', fontSize: 'var(--fs-sm)' }}>
+              {passwordErrors.root.message}
+            </div>
+          )}
+        </form>
       </Modal>
     </div>
   )

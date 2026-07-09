@@ -59,7 +59,10 @@ export default function LoginPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="password">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label className="form-label" htmlFor="password">Password</label>
+              <Link to="/lupa-password" style={{ fontSize: 'var(--fs-xs)', color: 'var(--clr-primary)', fontWeight: 600 }}>Lupa Password?</Link>
+            </div>
             <div className="password-wrap">
               <input
                 id="password"

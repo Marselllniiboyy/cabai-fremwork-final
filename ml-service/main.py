@@ -81,8 +81,12 @@ async def predict(image: UploadFile = File(...)):
         pred_class = label_encoder.inverse_transform([pred_encoded])[0]
         confidence = float(np.max(pred_proba))
 
-        cluster = int(kmeans_model.predict(features_scaled)[0])
-        severity = severity_mapping.get(cluster, "Tidak diketahui")
+        if "healthy" in pred_class.lower():
+            cluster = 0
+            severity = "Aman"
+        else:
+            cluster = int(kmeans_model.predict(features_scaled)[0])
+            severity = severity_mapping.get(cluster, "Tidak diketahui")
 
         return JSONResponse({
             "jenis_penyakit": pred_class,

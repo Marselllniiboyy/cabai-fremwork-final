@@ -10,11 +10,15 @@ import { LayoutDashboard, Camera, Activity, Sprout, AlertTriangle, CheckCircle, 
 const SEV_COLORS = {
   'Rendah': '#22c55e', 'Sedang': '#f59e0b', 'Tinggi': '#f97316', 'Kritis': '#ef4444',
   'rendah': '#22c55e', 'sedang': '#f59e0b', 'tinggi': '#f97316', 'kritis': '#ef4444',
+  'Ringan': '#22c55e', 'ringan': '#22c55e',
+  'Berat': '#f97316', 'berat': '#f97316',
+  'Sangat Berat': '#ef4444', 'sangat berat': '#ef4444',
 }
 const PIE_COLORS = ['#16a34a','#22c55e','#4ade80','#86efac','#f59e0b','#ef4444','#f97316','#0ea5e9','#8b5cf6']
 
 function SevBadge({ level }) {
-  const key = (level || '').toLowerCase()
+  const rawKey = (level || '').toLowerCase()
+  const key = (rawKey === 'ringan' || rawKey === 'aman' || rawKey === 'sehat') ? 'rendah' : (rawKey === 'berat' ? 'tinggi' : (rawKey === 'sangat berat' ? 'kritis' : rawKey))
   const map = { rendah: 'green', sedang: 'amber', tinggi: 'orange', kritis: 'red' }
   return <span className={`badge badge-${map[key] || 'gray'}`}>{level}</span>
 }
@@ -59,6 +63,31 @@ export default function DashboardPage() {
     }
   })
 
+  const getOverallStatus = () => {
+    if (!summary || !summary.per_keparahan || summary.per_keparahan.length === 0) {
+      return { label: 'Aman', color: 'var(--clr-primary)', iconClass: 'green', Icon: CheckCircle }
+    }
+
+    const levels = summary.per_keparahan.map(d => (d.tingkat_keparahan || '').toLowerCase())
+
+    if (levels.includes('sangat berat') || levels.includes('kritis')) {
+      return { label: 'Sangat Berat', color: 'var(--clr-danger)', iconClass: 'red', Icon: AlertTriangle }
+    }
+    if (levels.includes('berat') || levels.includes('tinggi')) {
+      return { label: 'Berat', color: 'var(--clr-warning)', iconClass: 'amber', Icon: AlertTriangle }
+    }
+    if (levels.includes('sedang')) {
+      return { label: 'Sedang', color: 'var(--clr-accent)', iconClass: 'amber', Icon: Activity }
+    }
+    if (levels.includes('ringan') || levels.includes('rendah')) {
+      return { label: 'Ringan', color: 'var(--clr-primary-light)', iconClass: 'green', Icon: Sprout }
+    }
+
+    return { label: 'Aman', color: 'var(--clr-primary)', iconClass: 'green', Icon: CheckCircle }
+  }
+
+  const overallStatus = getOverallStatus()
+
   return (
     <div className="page-content animate-fade">
       {/* Header */}
@@ -96,29 +125,15 @@ export default function DashboardPage() {
             <div className="stat-label">Lahan Aktif</div>
           </div>
         </div>
-        {sevData.find(s => s.name?.toLowerCase() === 'kritis') ? (
-          <div className="stat-card">
-            <div className="stat-icon red" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <AlertTriangle style={{ width: 22, height: 22 }} />
-            </div>
-            <div className="stat-info">
-              <div className="stat-value" style={{ color: 'var(--clr-danger)' }}>
-                {sevData.find(s => s.name?.toLowerCase() === 'kritis')?.value ?? 0}
-              </div>
-              <div className="stat-label">Tingkat Kritis</div>
-            </div>
+        <div className="stat-card">
+          <div className={`stat-icon ${overallStatus.iconClass}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <overallStatus.Icon style={{ width: 22, height: 22, color: overallStatus.color }} />
           </div>
-        ) : (
-          <div className="stat-card">
-            <div className="stat-icon green" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CheckCircle style={{ width: 22, height: 22 }} />
-            </div>
-            <div className="stat-info">
-              <div className="stat-value" style={{ color: 'var(--clr-primary)' }}>Aman</div>
-              <div className="stat-label">Status Tanaman</div>
-            </div>
+          <div className="stat-info">
+            <div className="stat-value" style={{ color: overallStatus.color }}>{overallStatus.label}</div>
+            <div className="stat-label">Status Tanaman</div>
           </div>
-        )}
+        </div>
         <div className="stat-card">
           <div className="stat-icon amber" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <Bug style={{ width: 22, height: 22 }} />

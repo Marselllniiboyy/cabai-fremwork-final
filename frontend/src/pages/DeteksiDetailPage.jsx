@@ -8,13 +8,15 @@ import { getDiseaseTranslation } from '../utils/diseaseHelper'
 import { ArrowLeft, Trash2, Sprout, Calendar, Target, Grid, AlertTriangle, Lightbulb, Camera, Info, Activity } from 'lucide-react'
 
 function SevBadge({ level }) {
-  const key = (level || '').toLowerCase()
+  const rawKey = (level || '').toLowerCase()
+  const key = (rawKey === 'ringan' || rawKey === 'aman' || rawKey === 'sehat') ? 'rendah' : (rawKey === 'berat' ? 'tinggi' : (rawKey === 'sangat berat' ? 'kritis' : rawKey))
   const map = { rendah: 'green', sedang: 'amber', tinggi: 'orange', kritis: 'red' }
   return <span className={`badge badge-${map[key] || 'gray'}`} style={{ fontSize: '0.9rem', padding: '4px 14px' }}>{level}</span>
 }
 
 function SevAdvice({ level }) {
-  const key = (level || '').toLowerCase()
+  const rawKey = (level || '').toLowerCase()
+  const key = (rawKey === 'ringan' || rawKey === 'aman' || rawKey === 'sehat') ? 'rendah' : (rawKey === 'berat' ? 'tinggi' : (rawKey === 'sangat berat' ? 'kritis' : rawKey))
   const advice = {
     rendah: 'Tanaman terdeteksi aman. Tetap pantau kondisi secara berkala dan jaga kebersihan lahan.',
     sedang: 'Ada tanda penyakit awal. Segera lakukan pengendalian dini seperti pemangkasan daun yang terkena dan aplikasi fungisida ringan.',
